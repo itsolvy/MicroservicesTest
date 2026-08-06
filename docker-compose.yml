@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: pg_database
+    restart: always
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: myappdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql  # Убрали "/data" на конце
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI port
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: secret
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+  web:
+    image: myaspnetapp
+    build:
+      context: .
+      dockerfile: MicroservicesTest.SenderApi/Dockerfile
+    container_name: aspnet_app
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=myappdb;Username=myuser;Password=mypassword
+      - ConnectionStrings__RabbitMq=amqp://admin:secret@rabbitmq:5672
+    depends_on:
+      - db
+      - rabbitmq
+
+
+volumes:
+  pgdata:
+  rabbitmq_data:  

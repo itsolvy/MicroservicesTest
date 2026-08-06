@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Shared/">
+    <File Path="docker-compose.yml" />
+    <File Path="Readme.md" />
+  </Folder>
+  <Project Path="MicroservicesTest.SenderApi/MicroservicesTest.SenderApi.csproj" />
+</Solution>
