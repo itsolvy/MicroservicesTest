@@ -61,5 +61,4 @@ using (var channel = await connection.CreateChannelAsync())
     {
         Console.WriteLine("Получен сигнал остановки. Завершаем работу...");
     }
-
 }

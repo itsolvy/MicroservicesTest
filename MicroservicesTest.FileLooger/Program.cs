@@ -12,9 +12,8 @@ var configuration = new ConfigurationBuilder()
     .Build();
 
 var hostUri = configuration["ConnectionStrings:RabbitMq"] ?? throw new ArgumentNullException();
+var fileName = $"{DateTime.Now.ToString("yyyy.MM.dd_HH:mm:ss")}_log.txt".Replace(" ", "_");
 var factory = new ConnectionFactory() { Uri = new Uri(hostUri) };
-
-var fileName = $"{DateTime.Now.ToString("g")}_log.txt".Replace(" ","_");
 using (var connection = await factory.CreateConnectionAsync())
 using (var channel = await connection.CreateChannelAsync())
 {
@@ -40,24 +39,25 @@ using (var channel = await connection.CreateChannelAsync())
     };
 
     await channel.BasicConsumeAsync(queue: RabbitMqConsts.LOG_QUEQUE_2, autoAck: false, consumer: consumer);
-}
+
 
     // 1. Создаем источник токена отмены
     var cts = new CancellationTokenSource();
 
-// 2. Подписываемся на системные события закрытия контейнера (Docker stop)
-AppDomain.CurrentDomain.ProcessExit += (s, e) => cts.Cancel();
-Console.CancelKeyPress += (s, e) =>
-{
-    e.Cancel = true; // предотвращаем мгновенное жесткое убийство процесса
-    cts.Cancel();
-};
+    // 2. Подписываемся на системные события закрытия контейнера (Docker stop)
+    AppDomain.CurrentDomain.ProcessExit += (s, e) => cts.Cancel();
+    Console.CancelKeyPress += (s, e) =>
+    {
+        e.Cancel = true; // предотвращаем мгновенное жесткое убийство процесса
+        cts.Cancel();
+    };
 
-try
-{
-    await Task.Delay(Timeout.Infinite, cts.Token);
-}
-catch (OperationCanceledException)
-{
-    Console.WriteLine("Получен сигнал остановки. Завершаем работу...");
+    try
+    {
+        await Task.Delay(Timeout.Infinite, cts.Token);
+    }
+    catch (OperationCanceledException)
+    {
+        Console.WriteLine("Получен сигнал остановки. Завершаем работу...");
+    }
 }
