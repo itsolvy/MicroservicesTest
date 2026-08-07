@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MicroservicesTest.FileLooger": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

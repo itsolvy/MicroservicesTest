@@ -14,6 +14,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+var featureConfig = builder.Configuration
+    .GetSection(FeatureFlagsConfig.SECTION_NAME)
+    .Get<FeatureFlagsConfig>() 
+        ?? throw new ArgumentNullException();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
@@ -33,14 +38,14 @@ builder.Services.AddHangfireServer();
 builder.Services.AddScoped<OrderModule>();
 var rabbitMqHost= builder.Configuration.GetConnectionString("RabbitMq");
 
-builder.Services.AddScoped<RabbitMqService>( _ => new RabbitMqService(rabbitMqHost));
+builder.Services.AddSingleton<RabbitMqService>( _ => new RabbitMqService(rabbitMqHost));
 var app = builder.Build();
 
 
-// --- БЛОК АВТОМАТИЧЕСКОЙ МИГРАЦИИ НА СТАРТЕ ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    // --- БЛОК АВТОМАТИЧЕСКОЙ МИГРАЦИИ НА СТАРТЕ ---
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
@@ -54,12 +59,34 @@ using (var scope = app.Services.CreateScope())
     {
         Console.WriteLine($"--> Ошибка при применении миграций: {ex.Message}");
     }
+
+    // --- БЛОК АВТОМАТИЧЕСКОЙ Инициализации RabbitMq ---
+    try
+    {
+
+        var service = services.GetRequiredService<RabbitMqService>();
+
+        // Эта команда создаст базу данных (если её нет) и применит все недостающие миграции
+        await service.Init(featureConfig);
+
+        Console.WriteLine("--> RabbitMq успешно инициализирован");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"--> Ошибка при инициализации RabbitMq: {ex.Message}");
+    }
 }
+
+
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
     Authorization = new[] { new AnonymousHangfireFilter() }
 });
 
+if (featureConfig.FannaotTask1Enable)
+{
+    app.UseMiddleware<CustomLoggingMiddleware>();
+}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

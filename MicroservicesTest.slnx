@@ -1,7 +1,12 @@
 <Solution>
   <Folder Name="/Shared/">
     <File Path="docker-compose.yml" />
+    <File Path="KnownIssues.md" />
     <File Path="Readme.md" />
+    <File Path="Tasks1-4.md" />
   </Folder>
+  <Project Path="MicroservicesTest.Common/MicroservicesTest.Common.csproj" Id="21f9351f-9c29-42c8-8268-929d0f7269f0" />
+  <Project Path="MicroservicesTest.ConsoleLogger/MicroservicesTest.ConsoleLogger.csproj" Id="1e9856f9-9b72-4aae-81eb-063826905879" />
+  <Project Path="MicroservicesTest.FileLooger/MicroservicesTest.FileLooger.csproj" Id="920f4c96-84b4-4191-8972-4f89c6b3f632" />
   <Project Path="MicroservicesTest.SenderApi/MicroservicesTest.SenderApi.csproj" />
 </Solution>

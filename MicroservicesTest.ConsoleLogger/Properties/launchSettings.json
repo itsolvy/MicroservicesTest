@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "MicroservicesTest.ConsoleLogger": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

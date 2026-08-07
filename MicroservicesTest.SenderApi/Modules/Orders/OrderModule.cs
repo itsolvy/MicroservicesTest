@@ -1,4 +1,5 @@
-﻿using MicroservicesTest.SenderApi.Db;
+﻿using MicroservicesTest.Common;
+using MicroservicesTest.SenderApi.Db;
 
 namespace MicroservicesTest.SenderApi.Modules.Orders
 {
@@ -25,7 +26,7 @@ namespace MicroservicesTest.SenderApi.Modules.Orders
             var toSend = db.Orders.Where(x => !x.MessageSend).ToArray();
             foreach (var message in toSend)
             {
-                await rabbitMq.SendMessage(message);
+                await rabbitMq.SendMessageDirect(RabbitMqConsts.ORDERS_QUEQUE, message);
                 message.MessageSend = true;
                 db.SaveChanges();
             }

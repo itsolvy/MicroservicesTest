@@ -42,6 +42,32 @@ services:
       - db
       - rabbitmq
 
+  console_logger:
+    image: console_logger
+    build:
+      context: .
+      dockerfile: MicroservicesTest.ConsoleLogger/Dockerfile
+    container_name: console_logger
+    environment:
+      - ConnectionStrings__RabbitMq=amqp://admin:secret@rabbitmq:5672
+    depends_on:
+      - db
+      - rabbitmq
+      - web
+
+  file_logger:
+    image: file_logger
+    build:
+      context: .
+      dockerfile: MicroservicesTest.FileLooger/Dockerfile
+    container_name: file_logger
+    environment:
+      - ConnectionStrings__RabbitMq=amqp://admin:secret@rabbitmq:5672
+    depends_on:
+      - db
+      - rabbitmq
+      - web
+
 
 volumes:
   pgdata:
