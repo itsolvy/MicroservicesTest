@@ -17,7 +17,7 @@ public class RabbitMqService : IAsyncDisposable, IDisposable
             Uri = new Uri(uri),
             ConsumerDispatchConcurrency=10
         };
-        _connectionTask = _factory.CreateConnectionAsync();
+        _connectionTask = _factory.CreateConnectionAsyncRetry();
     }
 
     public async ValueTask DisposeAsync()

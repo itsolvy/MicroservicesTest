@@ -14,9 +14,16 @@ var configuration = new ConfigurationBuilder()
 var hostUri = configuration["ConnectionStrings:RabbitMq"] ?? throw new ArgumentNullException();
 var fileName = $"{DateTime.Now.ToString("yyyy.MM.dd_HH:mm:ss")}_log.txt".Replace(" ", "_");
 var factory = new ConnectionFactory() { Uri = new Uri(hostUri) };
-using (var connection = await factory.CreateConnectionAsync())
+using (var connection = await factory.CreateConnectionAsyncRetry())
 using (var channel = await connection.CreateChannelAsync())
 {
+    await channel.QueueDeclareAsync(
+        queue: RabbitMqConsts.LOG_QUEQUE_2,
+        durable: true,
+        exclusive: false,
+        autoDelete: false,
+        arguments: null);
+
     var consumer = new AsyncEventingBasicConsumer(channel);
 
     consumer.ReceivedAsync += async (sender, ea) =>
